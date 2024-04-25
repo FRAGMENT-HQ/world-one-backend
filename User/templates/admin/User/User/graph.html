@@ -1,0 +1,11 @@
+{% extends 'admin/base_site.html' %} {% block content %}
+
+<h1>{{ object.first_name }} {{ object.last_name }}</h1>
+
+{% comment %} <div>{{ display_graph|safe }}</div> {% endcomment %}
+<div>
+    {% for child in display_graph %} 
+        <div>{{ child|safe }} </div>
+    {% endfor %} 
+</div>
+{% endblock %}
