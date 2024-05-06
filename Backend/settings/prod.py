@@ -1,18 +1,14 @@
 import dj_database_url
 import os
 from .common import Common
-import sentry_sdk
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 class Prod(Common):
 
-    sentry_sdk.init(
-    dsn=os.getenv('SENTRY_DSN'),
-    traces_sample_rate=1.0,
-    profiles_sample_rate=1.0,
-)
+    
 
     INSTALLED_APPS = Common.INSTALLED_APPS
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

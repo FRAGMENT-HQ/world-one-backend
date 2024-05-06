@@ -4,20 +4,13 @@ from django.utils.translation import gettext_lazy as _
 from User.manager import UserManager
 from Backend.utils.mixins import TimeStampMixin
 class User(AbstractUser):
-    # Some rules adding username
 
-    group_choices = [ 
-        ("a","A"),
-        ("b","B")
-     ]
-    
-    first_name = models.CharField(max_length=20)
-    last_name = models.CharField(max_length=20)
+    name = models.CharField(max_length=40,blank=True,null=True)
     phone_no = models.CharField(max_length=10, blank=True,unique=True)
-    email = models.EmailField(_('email'), max_length=80, unique=True)
-    group = models.CharField(max_length=2, choices=group_choices,default="a")
-    rating = models.PositiveIntegerField(default=800)
+    email = models.EmailField(_('email'), max_length=80)
+    pan_card = models.CharField(max_length=10, blank=True,null=True)
     username = None
+    city = models.CharField(max_length=40, blank=True,null=True)
     # Field for login
     USERNAME_FIELD = 'phone_no'
     is_staff = models.BooleanField(default=False)

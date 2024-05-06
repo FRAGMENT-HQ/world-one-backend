@@ -28,8 +28,19 @@ class OrderStatusConstants:
         (Cancelled, "Cancelled"),
         (Failed, "Failed"),
     )
-class CurrencyConstanata:
-    USD = 'USD'
-    EUR = 'EUR'
-    GBP = 'GBP'
+class CurrencyConstanats:
+    USD = 0
+    EUR = 1
+    GBP = 2
+    JPY = 3
+    CAD = 4
+    AUD = 5
+    CurrencyChoices = (
+        (USD, "USD"),
+        (EUR, "EUR"),
+        (GBP, "GBP"),
+        (JPY, "JPY"),
+        (CAD, "CAD"),
+        (AUD, "AUD"),
+    )
     
