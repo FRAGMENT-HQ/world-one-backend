@@ -21,13 +21,41 @@ class ForexViewSet(viewsets.ModelViewSet):
     def get_rate(self, request, *args, **kwargs):
 
         curr = request.GET.get('curr', None) 
+        resp = requests.get(f'https://v6.exchangerate-api.com/v6/524e3784777a25a786283a89/latest/INR')
+        data = resp.json()
+        cr = data['conversion_rates']
+
+        # forex = Forex.objects.filter(currency=curr).first()
+        rate = cr[curr]
+        for i in cr:
+            forex = Forex.objects.filter(currency=i).first()
+            if forex:
+                forex.rate = cr[i]
+                forex.save()
+            else:
+                forex = Forex(currency=i, rate=cr[i])
+                forex.save()
+
+        return Response(data={'rate': rate}, status=status.HTTP_200_OK)
+    @action(detail=False, methods=['get'], serializer_class=VisaSerializer)
+    def get_mini_list(self, request, *args, **kwargs):
+
+        curr = request.GET.get('curr', None) 
         resp = requests.get(f'https://v6.exchangerate-api.com/v6/524e3784777a25a786283a89/latest/{curr}')
         data = resp.json()
         print(data)
         cr = data['conversion_rates']
 
-        forex = Forex.objects.filter(currency=curr).first()
+        # forex = Forex.objects.filter(currency=curr).first()
         rate = round(cr["INR"],2)
+        for i in cr:
+            forex = Forex.objects.filter(currency=i).first()
+            if forex:
+                forex.rate = cr[i]
+                forex.save()
+            else:
+                forex = Forex(currency=i, rate=cr[i])
+                forex.save()
 
         return Response(data={'rate': rate}, status=status.HTTP_200_OK)
 class OrderViewSet(viewsets.ModelViewSet):
