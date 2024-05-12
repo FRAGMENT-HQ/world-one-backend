@@ -20,7 +20,7 @@ class Prod(Common):
     # SECURITY WARNING: update this when you have the production host
     ALLOWED_HOSTS = ['*']
 
-    CSRF_TRUSTED_ORIGINS = ['*']
+    CSRF_TRUSTED_ORIGINS = ["http://localhost:3000","https://backend.worldoneforex.com","http://backend.worldoneforex.com", "https://worldoneforex.com","http://worldoneforex.com","https://www.worldoneforex.com","http://www.worldoneforex.com"]
 
     MIDDLEWARE = Common.MIDDLEWARE + ["whitenoise.middleware.WhiteNoiseMiddleware"]
 
