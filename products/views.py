@@ -41,7 +41,7 @@ class ForexViewSet(viewsets.ModelViewSet):
     def get_mini_list(self, request, *args, **kwargs):
 
         curr = request.GET.get('curr', None) 
-        resp = requests.get(f'https://v6.exchangerate-api.com/v6/524e3784777a25a786283a89/latest/{curr}')
+        resp = requests.get(f'https://v6.exchangerate-api.com/v6/6ea75b8d7b7bc5a29831df19/latest/{curr}')
         data = resp.json()
         print(data)
         cr = data['conversion_rates']
