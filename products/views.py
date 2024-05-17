@@ -1,10 +1,10 @@
 from rest_framework.response import Response
 from rest_framework import viewsets
-from .models import Forex, Order, Visa, Ticket, Passport
+from .models import Forex, Order, Visa, Ticket, Passport,UserQuery
 from rest_framework import status
 from rest_framework.permissions import  IsAuthenticated
 from rest_framework.decorators import action
-from .serializers import ForexSerializer, OrderSerializer, VisaSerializer, TicketSerializer, PassportSerializer
+from .serializers import ForexSerializer, OrderSerializer, VisaSerializer, TicketSerializer, PassportSerializer,UserQuerySerializer
 from User.serializers import UserSignupSerializer
 from User.models import User
 import json
@@ -110,3 +110,7 @@ class FileStorageViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'], serializer_class=PassportSerializer)
     def passport(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
+
+class UserQueryViewSet(viewsets.ModelViewSet):
+    queryset = UserQuery.objects.all()
+    serializer_class = UserQuerySerializer

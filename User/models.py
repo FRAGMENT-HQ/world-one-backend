@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from User.manager import UserManager
-from Backend.utils.mixins import TimeStampMixin
+from Backend.utils.constants import CityConstants
 class User(AbstractUser):
 
     name = models.CharField(max_length=40,blank=True,null=True)
@@ -10,7 +10,7 @@ class User(AbstractUser):
     email = models.EmailField(_('email'), max_length=80)
     pan_card = models.CharField(max_length=10, blank=True,null=True)
     username = None
-    
+    # city = models.IntegerField(choices=CityConstants.CityChoices,default=CityConstants.all)
     # Field for login
     USERNAME_FIELD = 'phone_no'
     is_staff = models.BooleanField(default=False)

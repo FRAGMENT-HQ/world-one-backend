@@ -1,4 +1,4 @@
-from .models import Forex, Order, Visa, Ticket, Passport
+from .models import Forex, Order, Visa, Ticket, Passport,UserQuery
 from rest_framework import serializers
 from User.serializers import UserSerializer
 from Backend.utils.constants import ActionConstants, OrderStatusConstants, CurrencyConstanats
@@ -26,3 +26,8 @@ class PassportSerializer(serializers.ModelSerializer):
         model = Passport
         fields = '__all__'
     
+class UserQuerySerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = UserQuery
+        fields = '__all__'

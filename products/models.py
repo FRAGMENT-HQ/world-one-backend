@@ -26,12 +26,21 @@ class Order(models.Model):
     forex_rate = models.FloatField()
     product = models.CharField(max_length=40, blank=True,null=True)
     total_amount = models.FloatField()
+    purous_of_visit = models.CharField(max_length=40, blank=True,null=True)
+    citizenship = models.CharField(max_length=40, blank=True,null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
     user = models.ForeignKey(User, on_delete=models.CASCADE,related_name='order')
     class Meta:
         verbose_name = 'Order'
         verbose_name_plural = 'Order'
+    def __str__(self):
+        # mapper = 
+        # print(OrderStatusConstants.orderStatusMap[self.status])
+        sta = OrderStatusConstants.orderStatusMap[self.status]
+        return f"{self.user.email} {sta}"
 class Visa(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='visa')
     file = models.FileField(upload_to='visa/',null=True, blank=True)
@@ -51,3 +60,17 @@ class Passport(models.Model):
     class Meta:
         verbose_name = 'Passport'
         verbose_name_plural = 'Passport'
+class ExtraDocument(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='extra_document')
+    file = models.FileField(upload_to='extra_document/',null=True, blank=True)
+    name = models.CharField(max_length=40, blank=True, null=True)
+    class Meta:
+        verbose_name = 'ExtraDocument'
+        verbose_name_plural = 'ExtraDocument'
+
+class UserQuery(models.Model):
+    name = models.CharField(max_length=40)
+    email = models.EmailField()
+    phone_no = models.CharField(max_length=12)
+    query = models.TextField()
+    
