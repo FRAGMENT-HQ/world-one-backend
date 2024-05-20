@@ -41,6 +41,7 @@ class Order(models.Model):
         # print(OrderStatusConstants.orderStatusMap[self.status])
         sta = OrderStatusConstants.orderStatusMap[self.status]
         return f"{self.user.email} {sta}"
+    
 class Visa(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='visa')
     file = models.FileField(upload_to='visa/',null=True, blank=True)
@@ -60,6 +61,14 @@ class Passport(models.Model):
     class Meta:
         verbose_name = 'Passport'
         verbose_name_plural = 'Passport'
+
+class Pan(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='pan')
+    file = models.FileField(upload_to='pan/',null=True, blank=True)
+    type = models.CharField(max_length=40, default="User")
+    class Meta:
+        verbose_name = 'Pan'
+        verbose_name_plural = 'Pan'
 class ExtraDocument(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='extra_document')
     file = models.FileField(upload_to='extra_document/',null=True, blank=True)

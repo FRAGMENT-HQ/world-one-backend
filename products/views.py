@@ -1,10 +1,10 @@
 from rest_framework.response import Response
 from rest_framework import viewsets
-from .models import Forex, Order, Visa, Ticket, Passport,UserQuery
+from .models import Forex, Order, Visa, Ticket, Passport,UserQuery,Pan,ExtraDocument
 from rest_framework import status
 from rest_framework.permissions import  IsAuthenticated
 from rest_framework.decorators import action
-from .serializers import ForexSerializer, OrderSerializer, VisaSerializer, TicketSerializer, PassportSerializer,UserQuerySerializer
+from .serializers import ForexSerializer, OrderSerializer, VisaSerializer, TicketSerializer, PassportSerializer,UserQuerySerializer,PanSerializer,ExtraDocumentSerializer
 from User.serializers import UserSignupSerializer
 from User.models import User
 import json
@@ -56,7 +56,8 @@ class OrderViewSet(viewsets.ModelViewSet):
     def create_order(self, request, *args, **kwargs):
         data = request.data
         user= json.loads(data["user"])
-        print(type(user)    )
+        name = data['name']
+        print(data)
         if User.objects.filter(phone_no=user['phone_no']).exists():
             user = User.objects.filter(phone_no=user['phone_no']).first()
         else:
@@ -72,10 +73,14 @@ class OrderViewSet(viewsets.ModelViewSet):
         order=order_serilizer.save()
         
         files = request.FILES
+        print(files)
         visa_file = files.get('visa', None)
         ticket_file = files.get('ticket', None)
         passport_back_file = files.get('passport_back', None)
         passport_front_file = files.get('passport_front', None)
+        pan_file = data.get('pan', None)
+        extra_file = files.get('extra_file', None)
+        c_pan = files.get('c_pan', None)
         if visa_file:
             visa = Visa(order=order,file=visa_file)
             visa.save()
@@ -88,6 +93,19 @@ class OrderViewSet(viewsets.ModelViewSet):
             passport.file_back = passport_back_file
             passport.file_front = passport_front_file
             passport.save()
+        if pan_file:
+            pan = Pan(order=order_serilizer.instance)
+            pan.file = pan_file
+            pan.save()
+        if extra_file:
+            extra = ExtraDocument(order=order_serilizer.instance,name=name)
+            extra.file = extra_file
+            extra.save()
+        if c_pan:
+            pan = Pan(order=order_serilizer.instance)
+            pan.file = c_pan
+            pan.type = "Company"
+            pan.save()
 
 
         return Response(status=status.HTTP_201_CREATED)

@@ -1,4 +1,4 @@
-from .models import Forex, Order, Visa, Ticket, Passport,UserQuery
+from .models import Forex, Order, Visa, Ticket, Passport,UserQuery,Pan,ExtraDocument
 from rest_framework import serializers
 from User.serializers import UserSerializer
 from Backend.utils.constants import ActionConstants, OrderStatusConstants, CurrencyConstanats
@@ -30,4 +30,14 @@ class UserQuerySerializer(serializers.ModelSerializer):
     
     class Meta:
         model = UserQuery
+        fields = '__all__'
+class PanSerializer(serializers.ModelSerializer):
+    order = OrderSerializer()
+    class Meta:
+        model = Pan
+        fields = '__all__'
+class ExtraDocumentSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = ExtraDocument
         fields = '__all__'
