@@ -84,4 +84,14 @@ class UserViewSet(viewsets.ModelViewSet):
         else:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     
-    
+    @action(detail=False, methods=['post'], serializer_class=UserSignupSerializer)
+    def google_login(self, request, *args, **kwargs):
+        data = request.data
+        user = User.objects.filter(email=data['email']).first()
+        if user:
+            return Response(data=UserSignupSerializer(user).data, status=status.HTTP_200_OK)
+        else:
+            user_serilizer = UserSignupSerializer(data=data)
+            user_serilizer.is_valid(raise_exception=True)
+            user=user_serilizer.save()
+            return Response(data=user_serilizer.data, status=status.HTTP_201_CREATED)

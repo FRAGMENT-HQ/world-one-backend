@@ -80,6 +80,15 @@ class ExtraDocument(models.Model):
 class UserQuery(models.Model):
     name = models.CharField(max_length=40)
     email = models.EmailField()
-    phone_no = models.CharField(max_length=12)
-    query = models.TextField()
+    phone_no = models.CharField(max_length=14)
+    query = models.TextField(default="",blank=True,null=True)
+    company = models.CharField(max_length=40, default="",blank=True,null=True)
+    created_at = models.DateTimeField(auto_now_add=True,blank=True,null=True)
     
+class Resume(models.Model):
+    # user = models.ForeignKey(User, on_delete=models.CASCADE,related_name='resume')
+    file = models.FileField(upload_to='resume/',null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        verbose_name = 'Resume'
+        verbose_name_plural = 'Resume'
