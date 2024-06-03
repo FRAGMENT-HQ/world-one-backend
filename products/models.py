@@ -23,12 +23,11 @@ class Order(models.Model):
     status = models.IntegerField(choices=OrderStatusConstants.orderStatusChoices, default=OrderStatusConstants.Pending)
     city = models.CharField(max_length=40, blank=True,null=True)
     amount = models.FloatField()
-    forex_rate = models.FloatField()
-    product = models.CharField(max_length=40, blank=True,null=True)
+    
     total_amount = models.FloatField()
     purous_of_visit = models.CharField(max_length=40, blank=True,null=True)
     citizenship = models.CharField(max_length=40, blank=True,null=True)
-
+    gst_amount = models.FloatField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -42,6 +41,18 @@ class Order(models.Model):
         sta = OrderStatusConstants.orderStatusMap[self.status]
         return f"{self.user.email} {sta}"
     
+class OrderItems(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
+    product = models.CharField(max_length=40)
+    forex_amount = models.FloatField()
+    inr_amount = models.FloatField()
+    forex_rate = models.FloatField()
+    currency = models.CharField(max_length=4, default="USD")
+    bs = models.CharField(max_length=4, default="Buy")
+    class Meta:
+        verbose_name = 'OrderItems'
+        verbose_name_plural = 'OrderItems'
+
 class Visa(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='visa')
     file = models.FileField(upload_to='visa/',null=True, blank=True)
@@ -92,3 +103,16 @@ class Resume(models.Model):
     class Meta:
         verbose_name = 'Resume'
         verbose_name_plural = 'Resume'
+
+class Outlets(models.Model):
+    icon = models.ImageField(upload_to='outlets/',null=True, blank=True)
+    name = models.CharField(max_length=40)
+    address = models.TextField()
+    city = models.CharField(max_length=40)
+    phone_no = models.CharField(max_length=14)
+    email = models.EmailField()
+    timming_weekdays = models.CharField(max_length=40)
+    timming_weekend = models.CharField(max_length=40)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
