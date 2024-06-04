@@ -39,19 +39,23 @@ class ForexViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
 
         inc_quryset = Forex.objects.all().filter(currency__in=self.prioroity_set)
-        # exc_quryset = Forex.objects.all().exclude(currency__in=self.prioroity_set)
-
-        queryset = list(inc_quryset)  # + list(exc_quryset)
-        sorted(queryset, key=lambda x: self.prioroity_set.index(x.currency))
+        exc_quryset = Forex.objects.all().exclude(currency__in=self.prioroity_set)
+        inc_quryset = sorted(inc_quryset, key=lambda x: self.prioroity_set.index(x.currency))
+        queryset = list(inc_quryset) + list(exc_quryset)
+        # sorted(queryset, key=lambda x: self.prioroity_set.index(x.currency))
         serializer = self.get_serializer(queryset, many=True)
 
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['get'], serializer_class=VisaSerializer)
+    @action(detail=False, methods=['get'], serializer_class=ForexSerializer)
     def mini(self, request, *args, **kwargs):
-        queryset = Forex.objects.all().filter(currency__in=self.prioroity_set)
+        queryset = list(Forex.objects.all().filter(currency__in=self.prioroity_set))
+        queryset = sorted(queryset, key=lambda x: self.prioroity_set.index(x.currency),reverse=True)
         serializer = self.get_serializer(queryset, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
+    
+   
+
 
     @action(detail=False, methods=['get'], serializer_class=VisaSerializer)
     def get_rate(self, request, *args, **kwargs):
@@ -82,7 +86,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     # permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
-        if self.action == 'create_order':
+        if self.action in ['create_order',"List"] :
             permission_classes = [AllowAny]
         else:
             permission_classes = [IsAuthenticated]
@@ -152,7 +156,10 @@ class OrderViewSet(viewsets.ModelViewSet):
             pan.save()
 
         return Response(status=status.HTTP_201_CREATED)
-
+    @action(detail=False, methods=['post'], serializer_class=OrderSerializer)
+    def List(self,request,*args,**kwargs):
+        pass
+        
 
 class FileStorageViewSet(viewsets.ModelViewSet):
     queryset = Visa.objects.all()

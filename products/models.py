@@ -23,7 +23,6 @@ class Order(models.Model):
     status = models.IntegerField(choices=OrderStatusConstants.orderStatusChoices, default=OrderStatusConstants.Pending)
     city = models.CharField(max_length=40, blank=True,null=True)
     amount = models.FloatField()
-    
     total_amount = models.FloatField()
     purous_of_visit = models.CharField(max_length=40, blank=True,null=True)
     citizenship = models.CharField(max_length=40, blank=True,null=True)
