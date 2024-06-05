@@ -16,4 +16,4 @@ RUN pip install --upgrade 'sentry-sdk[django]'
 
 COPY . .
 
-CMD ["sh", "-c", "export PYTHONPATH=/usr/itb;export DJANGO_CONFIGURATION=Prod; python manage.py collectstatic --no-input;python manage.py makemigrations;python manage.py migrate;gunicorn Backend.wsgi:application -b 0.0.0.0:9006 --timeout 60000 "]
+CMD ["sh", "-c", "export PYTHONPATH=/usr/itb;export DJANGO_CONFIGURATION=Prod; python manage.py collectstatic --no-input;python manage.py makemigrations;python manage.py migrate;gunicorn Backend.wsgi:application -b 0.0.0.0:9069 --timeout 60000 "]
