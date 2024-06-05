@@ -43,11 +43,23 @@ class ExtraDocumentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class OrderItemsSerializer(serializers.ModelSerializer):
-        
+        # status = serializers.SerializerMethodField(read_only=True)
+
+        # def get_status(self, obj):
+        #     return OrderStatusConstants.orderStatusMap[obj.status]
+        class Meta:
+            model = OrderItems
+            fields = '__all__'
+class OrderItemsListSerializer(serializers.ModelSerializer):
+        status = serializers.SerializerMethodField()
+
+        def get_status(self, obj):
+            return obj.order.status
         class Meta:
             model = OrderItems
             fields = '__all__'
             
+
 class OutletsSerializer(serializers.ModelSerializer):
     
     class Meta:

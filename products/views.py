@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 from rest_framework.views import APIView
-from .serializers import ForexSerializer, OrderSerializer, VisaSerializer, TicketSerializer, PassportSerializer, UserQuerySerializer, OutletsSerializer, OrderItemsSerializer
+from .serializers import ForexSerializer, OrderSerializer, VisaSerializer, TicketSerializer, PassportSerializer, UserQuerySerializer, OutletsSerializer, OrderItemsSerializer,OrderItemsListSerializer
 from User.serializers import UserSignupSerializer
 from User.models import User
 from rest_framework.generics import ListAPIView
@@ -20,6 +20,14 @@ class OutletsView(ListAPIView):
     serializer_class = OutletsSerializer
     permission_classes = [AllowAny]
 
+
+class ItemsViewSet(APIView):
+   def get(self,request,*args,**kwargs):
+        email = request.GET.get('email',None)
+        order = OrderItems.objects.filter(order__user__email=email)
+        serilzer = OrderItemsListSerializer(order,many=True)
+        return Response(data=serilzer.data,status=status.HTTP_200_OK)
+    
 
 class ForexViewSet(viewsets.ModelViewSet):
     queryset = Forex.objects.all()
@@ -97,7 +105,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         data = request.data
         user = json.loads(data["user"])
         name = data['name']
-        print(data)
+       
         if User.objects.filter(phone_no=user['phone_no']).exists():
             user = User.objects.filter(phone_no=user['phone_no']).first()
         else:
@@ -196,11 +204,10 @@ class UserQueryViewSet(viewsets.ModelViewSet):
 
 class ResumeViewSet(APIView):
     def post(self, request, *args, **kwargs):
-        data = request.data
-        file = data.get('file', None)
-        resume = Resume(file=file)
+        # data = request.data
+        files = request.FILES
+        res_file = files.get('resume', None)
+        resume = Resume(file=res_file)
         resume.save()
         return Response(status=status.HTTP_201_CREATED)
-# class userViewSet(viewsets.ModelViewSet):
-#     queryset = User.objects.all()
-#     serializer_class = UserSignupSerializer
+
