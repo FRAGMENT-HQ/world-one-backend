@@ -70,7 +70,7 @@ class ForexViewSet(viewsets.ModelViewSet):
 
         curr = request.GET.get('curr', None)
         resp = requests.get(
-            f'https://v6.exchangerate-api.com/v6/6ea75b8d7b7bc5a29831df19/latest/INR')
+            f'https://v6.exchangerate-api.com/v6/c7dbfb5bc19040987eb0a90f/latest/INR')
         data = resp.json()
         cr = data['conversion_rates']
 
