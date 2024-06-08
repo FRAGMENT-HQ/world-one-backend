@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 from rest_framework.views import APIView
-from .serializers import ForexSerializer, OrderSerializer, VisaSerializer, TicketSerializer, PassportSerializer, UserQuerySerializer, OutletsSerializer, OrderItemsSerializer,OrderItemsListSerializer
+from .serializers import ForexSerializer, OrderSerializer, VisaSerializer, TicketSerializer, PassportSerializer, UserQuerySerializer, OutletsSerializer, OrderItemsSerializer,OrderItemsListSerializer,DelievryAdressSerializer
 from User.serializers import UserSignupSerializer
 from User.models import User
 from rest_framework.generics import ListAPIView
@@ -27,6 +27,15 @@ class ItemsViewSet(APIView):
         order = OrderItems.objects.filter(order__user__email=email)
         serilzer = OrderItemsListSerializer(order,many=True)
         return Response(data=serilzer.data,status=status.HTTP_200_OK)
+
+class AddAdressView(APIView):
+    def post(self,request,*args,**kwargs):
+        data = request.data
+        serilizer = DelievryAdressSerializer(data=data)
+        serilizer.is_valid(raise_exception=True)
+        serilizer.save()
+        return Response(data=serilizer.data,status=status.HTTP_201_CREATED)
+        
     
 
 class ForexViewSet(viewsets.ModelViewSet):
@@ -119,13 +128,15 @@ class OrderViewSet(viewsets.ModelViewSet):
         order_serilizer = OrderSerializer(data=order)
         order_serilizer.is_valid(raise_exception=True)
         order = order_serilizer.save()
-
-        items = json.loads(data['items'])
-        for item in items:
-            item['order'] = order.pk
-            item_serilizer = OrderItemsSerializer(data=item)
-            item_serilizer.is_valid(raise_exception=True)
-            item_serilizer.save()
+        try:
+            items = json.loads(data['items'])
+            for item in items:
+                item['order'] = order.pk
+                item_serilizer = OrderItemsSerializer(data=item)
+                item_serilizer.is_valid(raise_exception=True)
+                item_serilizer.save()
+        except:
+            pass
 
         files = request.FILES
 
@@ -163,7 +174,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             pan.type = "Company"
             pan.save()
 
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_201_CREATED, data={'id': order.pk})
     @action(detail=False, methods=['post'], serializer_class=OrderSerializer)
     def List(self,request,*args,**kwargs):
         pass

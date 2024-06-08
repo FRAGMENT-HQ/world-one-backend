@@ -87,6 +87,19 @@ class ExtraDocument(models.Model):
         verbose_name = 'ExtraDocument'
         verbose_name_plural = 'ExtraDocument'
 
+class DelievryAdress(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='delievry_adress')
+    address = models.TextField()
+    city = models.CharField(max_length=40)
+    state = models.CharField(max_length=40)
+    phone_no = models.CharField(max_length=14)
+    email = models.EmailField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    class Meta:
+        verbose_name = 'DelievryAdress'
+        verbose_name_plural = 'DelievryAdress'
+
 class UserQuery(models.Model):
     name = models.CharField(max_length=40)
     email = models.EmailField()
