@@ -58,9 +58,22 @@ class OrderItemsSerializer(serializers.ModelSerializer):
             fields = '__all__'
 class OrderItemsListSerializer(serializers.ModelSerializer):
         status = serializers.SerializerMethodField()
+        date = serializers.SerializerMethodField()
+        time = serializers.SerializerMethodField()
+        city = serializers.SerializerMethodField()
 
         def get_status(self, obj):
             return obj.order.status
+        def get_date(self, obj):
+            date_obj = obj.order.created_at.date()
+            # format May 22, 2021
+            return date_obj.strftime("%B %d, %Y")
+        def get_time(self, obj):
+            time_obj = obj.order.created_at.time()
+            # format 12:00
+            return time_obj.strftime("%H:%M")
+        def get_city(self, obj):
+            return obj.order.city
         class Meta:
             model = OrderItems
             fields = '__all__'
