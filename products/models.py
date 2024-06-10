@@ -63,7 +63,7 @@ class Ticket(models.Model):
     file = models.FileField(upload_to='ticket/',null=True, blank=True)
     class Meta:
         verbose_name = 'Ticket'
-        verbose_name_plural = 'Ticket'
+        verbose_name_plural = 'Tickets'
 class Passport(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='passport')
     file_back = models.FileField(upload_to='passport/back/', null=True, blank=True)

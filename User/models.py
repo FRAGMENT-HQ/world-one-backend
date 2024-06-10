@@ -16,6 +16,7 @@ class User(AbstractUser):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)    
     updated_at = models.DateTimeField(auto_now=True)
+    city = models.CharField(max_length=40, blank=True,null=True)
 
     # Field for command createsuperuser
     REQUIRED_FIELDS = ['first_name','last_name','email']
