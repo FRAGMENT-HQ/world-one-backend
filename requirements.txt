@@ -22,5 +22,6 @@ django-celery-beat
 django-celery-results
 matplotlib
 gevent
+cashfree_pg
 
 
