@@ -67,34 +67,43 @@ class ForexViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], serializer_class=ForexSerializer)
     def mini(self, request, *args, **kwargs):
         queryset = list(Forex.objects.all().filter(currency__in=self.prioroity_set))
-        queryset = sorted(queryset, key=lambda x: self.prioroity_set.index(x.currency),reverse=True)
+        queryset = sorted(queryset, key=lambda x: self.prioroity_set.index(x.currency),reverse=False)
         serializer = self.get_serializer(queryset, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
-    
-   
-
 
     @action(detail=False, methods=['get'], serializer_class=VisaSerializer)
     def get_rate(self, request, *args, **kwargs):
-
+        # check if Forex had been called 10 minutes ago
         curr = request.GET.get('curr', None)
+
+        obj = Forex.objects.first()
+        if obj:
+            rate = Forex.objects.filter(currency=curr).first()
+            return Response(data={'rate': rate.rate}, status=status.HTTP_200_OK)
+                
+
         resp = requests.get(
             f'https://v6.exchangerate-api.com/v6/c7dbfb5bc19040987eb0a90f/latest/INR')
-        data = resp.json()
-        cr = data['conversion_rates']
+        try:
+            data = resp.json()
+            cr = data['conversion_rates']
 
-        # forex = Forex.objects.filter(currency=curr).first()
-        rate = cr[curr]
-        for i in cr:
-            forex = Forex.objects.filter(currency=i).first()
-            if forex:
-                forex.rate = cr[i]
-                forex.save()
-            else:
-                forex = Forex(currency=i, rate=cr[i])
-                forex.save()
+            # forex = Forex.objects.filter(currency=curr).first()
+            rate = cr[curr]
+            for i in cr:
+                forex = Forex.objects.filter(currency=i).first()
+                if forex:
+                    forex.rate = cr[i]
+                    forex.save()
+                else:
+                    forex = Forex(currency=i, rate=cr[i])
+                    forex.save()
 
-        return Response(data={'rate': rate}, status=status.HTTP_200_OK)
+            return Response(data={'rate': rate}, status=status.HTTP_200_OK)
+        except:
+            rate = Forex.objects.filter(currency=curr).first()
+            return Response(data={'rate': rate.rate}, status=status.HTTP_200_OK)
+
 
 
 class OrderViewSet(viewsets.ModelViewSet):

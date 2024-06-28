@@ -76,6 +76,8 @@ class Pan(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='pan')
     file = models.FileField(upload_to='pan/',null=True, blank=True)
     type = models.CharField(max_length=40, default="User")
+
+    
     class Meta:
         verbose_name = 'Pan'
         verbose_name_plural = 'Pan'
@@ -92,6 +94,8 @@ class DelievryAdress(models.Model):
     address = models.TextField()
     city = models.CharField(max_length=40)
     state = models.CharField(max_length=40)
+    landmark = models.CharField(max_length=40,default="")
+    pincode = models.CharField(max_length=6,default="")
     phone_no = models.CharField(max_length=14)
     email = models.EmailField()
     created_at = models.DateTimeField(auto_now_add=True)

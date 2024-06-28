@@ -10,8 +10,6 @@ class User(AbstractUser):
     email = models.EmailField(_('email'), max_length=80)
     pan_card = models.CharField(max_length=10, blank=True,null=True)
     username = None
-    # city = models.IntegerField(choices=CityConstants.CityChoices,default=CityConstants.all)
-    # Field for login
     USERNAME_FIELD = 'phone_no'
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)    

@@ -48,6 +48,7 @@ class Common(Configuration):
         # apps
         'User.apps.UserConfig',
         'products.apps.ProductsConfig',
+        'payments.apps.PaymentsConfig',
     ]
     
 
