@@ -45,10 +45,12 @@ class Common(Configuration):
         'ckeditor_uploader',
         'corsheaders',
         'django_extensions',
+        
         # apps
         'User.apps.UserConfig',
         'products.apps.ProductsConfig',
         'payments.apps.PaymentsConfig',
+        'blogs.apps.BlogsConfig',
     ]
     
 
