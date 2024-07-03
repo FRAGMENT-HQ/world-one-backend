@@ -1,12 +1,16 @@
 from django.contrib import admin
 from .models import Forex, Order, Visa, Ticket, Passport,UserQuery,Pan,ExtraDocument,Outlets,OrderItems,DelievryAdress,User
-
+from payments.models import Payment
 
 
 admin.site.site_header = "Admin"
 
 class OrderItemsInline(admin.TabularInline):
     model = OrderItems  
+    extra = 0
+
+class PaymentInline(admin.TabularInline):
+    model = Payment
     extra = 0
 
 class VisaInline(admin.TabularInline):
@@ -56,6 +60,7 @@ class OrderAdmin(admin.ModelAdmin):
                PanInline, 
                ExtraDocumentInline, 
                DelievryAdressInline,
+                PaymentInline,
                 
                ]
 
