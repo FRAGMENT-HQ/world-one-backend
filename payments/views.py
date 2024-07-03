@@ -19,7 +19,7 @@ class PayoutsView(APIView):
     def post(self, request):
         # Create a client object
         data = request.data
-        print(data)
+        
         user = User.objects.filter(email=data['email']).first()
         methord = data["methord"]
         order = Order.objects.filter(id=data['order_id']).first()
@@ -44,6 +44,14 @@ class PayoutsView(APIView):
         except Exception as e:
             print(e)
             return Response({"error": "Something went wrong"}, status=400)
+    
+class confirmation(APIView):
+    def post(self, request):
+        data = request.data
+        payment = Payment.objects.filter(cashfree_id=data['order_id']).first()
+        payment.payment_status = data['status']
+        payment.save()
+        return Response({"message": "success"})
 
         
 
