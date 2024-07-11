@@ -1,18 +1,23 @@
 from rest_framework.response import Response
 from rest_framework import viewsets
-from .models import Forex, Order, Visa, Ticket, Passport, UserQuery, Pan, ExtraDocument, Resume, Outlets, OrderItems
+from .models import Forex, Order, Visa, Ticket, Passport, UserQuery, Pan, ExtraDocument, Resume, Outlets, OrderItems, City
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny,IsAdminUser
 from rest_framework.decorators import action
 from rest_framework.views import APIView
-from .serializers import ForexSerializer, OrderSerializer, VisaSerializer, TicketSerializer, PassportSerializer, UserQuerySerializer, OutletsSerializer, OrderItemsSerializer,OrderItemsListSerializer,DelievryAdressSerializer
+from .serializers import ForexSerializer, OrderSerializer, VisaSerializer, TicketSerializer, PassportSerializer, UserQuerySerializer, OutletsSerializer, OrderItemsSerializer, OrderItemsListSerializer, DelievryAdressSerializer, TravelerDetailsSerializer, CitySerializer
 from User.serializers import UserSignupSerializer
 from User.models import User
 from rest_framework.generics import ListAPIView
 import json
-
+import datetime
+import pytz
+from communication.utils import send_email
+# get django groups
+from django.contrib.auth.models import Group
 import requests
 # Create your views here.
+india_tz = pytz.timezone('Asia/Kolkata')
 
 
 class OutletsView(ListAPIView):
@@ -21,53 +26,74 @@ class OutletsView(ListAPIView):
     permission_classes = [AllowAny]
 
 
+class CityRates(APIView):
+    def get(self, request, *args, **kwargs):
+        city = request.GET.get('city', None)
+        if city:
+            city = City.objects.filter(name=city).first()
+        else:
+            city = City.objects.filter(name='all').first()
+
+        return Response(data=CitySerializer(city).data, status=status.HTTP_200_OK)
+
+
 class ItemsViewSet(APIView):
-   def get(self,request,*args,**kwargs):
-        email = request.GET.get('email',None)
-        order = OrderItems.objects.filter(order__user__email=email)
-        serilzer = OrderItemsListSerializer(order,many=True)
-        return Response(data=serilzer.data,status=status.HTTP_200_OK)
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        order = OrderItems.objects.filter(order__user=user.pk)
+        serilzer = OrderItemsListSerializer(order, many=True)
+        return Response(data=serilzer.data, status=status.HTTP_200_OK)
+
 
 class AddAdressView(APIView):
-    def post(self,request,*args,**kwargs):
+    def post(self, request, *args, **kwargs):
         data = request.data
         serilizer = DelievryAdressSerializer(data=data)
         serilizer.is_valid(raise_exception=True)
         serilizer.save()
-        return Response(data=serilizer.data,status=status.HTTP_201_CREATED)
-        
-    
+        return Response(data=serilizer.data, status=status.HTTP_201_CREATED)
+
 
 class ForexViewSet(viewsets.ModelViewSet):
     queryset = Forex.objects.all()
     serializer_class = ForexSerializer
     prioroity_set = ['USD', 'EUR', 'GBP', 'CAD', 'SGD', "AUD"]
+    
 
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
 
     def get_permissions(self):
-        if self.action == "create":
-            permission_classes = [IsAuthenticated]
-        else:
+        if self.action in ["mini", "get_rate", "list"] :
             permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
 
     def list(self, request, *args, **kwargs):
+        city = request.GET.get('city', None)
+        if city:
+            city = City.objects.filter(name=city).first()
+        else:
+            city = City.objects.filter(name='all').first()
 
-        inc_quryset = Forex.objects.all().filter(currency__in=self.prioroity_set)
-        exc_quryset = Forex.objects.all().exclude(currency__in=self.prioroity_set)
-        inc_quryset = sorted(inc_quryset, key=lambda x: self.prioroity_set.index(x.currency))
-        queryset = list(inc_quryset) + list(exc_quryset)
+        inc_quryset = Forex.objects.all().filter(priority__gt=0).order_by('priority')
+        
+        
+        queryset = list(inc_quryset) 
         # sorted(queryset, key=lambda x: self.prioroity_set.index(x.currency))
         serializer = self.get_serializer(queryset, many=True)
 
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        return Response(data={"data": serializer.data, "city": CitySerializer(city).data}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'], serializer_class=ForexSerializer)
     def mini(self, request, *args, **kwargs):
-        queryset = list(Forex.objects.all().filter(currency__in=self.prioroity_set))
-        queryset = sorted(queryset, key=lambda x: self.prioroity_set.index(x.currency),reverse=False)
+        queryset = list(Forex.objects.all().filter(
+            currency__in=self.prioroity_set))
+        queryset = sorted(queryset, key=lambda x: self.prioroity_set.index(
+            x.currency), reverse=False)
         serializer = self.get_serializer(queryset, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
@@ -75,12 +101,26 @@ class ForexViewSet(viewsets.ModelViewSet):
     def get_rate(self, request, *args, **kwargs):
         # check if Forex had been called 10 minutes ago
         curr = request.GET.get('curr', None)
+        city = request.GET.get('city', None)
+
+        if city:
+            city = City.objects.filter(name=city).first()
+        else:
+            city = City.objects.filter(name='All').first()
+        citySer = CitySerializer(city)
 
         obj = Forex.objects.first()
+        usd = Forex.objects.filter(currency='USD').first()
+
         if obj:
-            rate = Forex.objects.filter(currency=curr).first()
-            return Response(data={'rate': rate.rate}, status=status.HTTP_200_OK)
-                
+            # convert ot indian standerd time
+            # now = datetime.datetime.now( datetime.timezone.utc).astimezone(datetime.timezone.utc )
+            if obj.created_at.astimezone(india_tz) + datetime.timedelta(minutes=10) < datetime.datetime.now(india_tz):
+                print(obj.created_at + datetime.timedelta(minutes=10)
+                      < datetime.datetime.now(india_tz))
+
+                rate = Forex.objects.filter(currency=curr).first()
+                return Response(data={'rate': rate.rate, "mark_up": rate.markupPercentage, "mark_down": rate.markdownPercentage, "usd": usd.rate, "city": citySer.data}, status=status.HTTP_200_OK)
 
         resp = requests.get(
             f'https://v6.exchangerate-api.com/v6/c7dbfb5bc19040987eb0a90f/latest/INR')
@@ -89,21 +129,25 @@ class ForexViewSet(viewsets.ModelViewSet):
             cr = data['conversion_rates']
 
             # forex = Forex.objects.filter(currency=curr).first()
-            rate = cr[curr]
+
             for i in cr:
+                print(i)
                 forex = Forex.objects.filter(currency=i).first()
                 if forex:
                     forex.rate = cr[i]
+                    forex.created_at = datetime.datetime.now(india_tz)
                     forex.save()
                 else:
                     forex = Forex(currency=i, rate=cr[i])
                     forex.save()
+            usd = Forex.objects.filter(currency='USD').first()
+            rate = Forex.objects.filter(currency=curr).first()
 
-            return Response(data={'rate': rate}, status=status.HTTP_200_OK)
+            return Response(data={'rate': rate.rate, "mark_up": rate.markupPercentage, "mark_down": rate.markdownPercentage, "city": citySer.data, 'usd': usd.rate}, status=status.HTTP_200_OK)
         except:
             rate = Forex.objects.filter(currency=curr).first()
-            return Response(data={'rate': rate.rate}, status=status.HTTP_200_OK)
-
+            usd = Forex.objects.filter(currency='USD').first()
+            return Response(data={'rate': rate.rate, 'usd': usd.rate, "mark_up": rate.markupPercentage, "mark_down": rate.markdownPercentage, "city": citySer.data}, status=status.HTTP_200_OK)
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -112,7 +156,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     # permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
-        if self.action in ['create_order',"List"] :
+        if self.action in ["List"]:
             permission_classes = [AllowAny]
         else:
             permission_classes = [IsAuthenticated]
@@ -123,20 +167,21 @@ class OrderViewSet(viewsets.ModelViewSet):
         data = request.data
         user = json.loads(data["user"])
         name = data['name']
-       
-        if User.objects.filter(phone_no=user['phone_no']).exists():
-            user = User.objects.filter(phone_no=user['phone_no']).first()
-        else:
 
-            user["password"] = "123456"
-            user_serilizer = UserSignupSerializer(data=user)
-            user_serilizer.is_valid(raise_exception=True)
-            user = user_serilizer.save()
+        user = request.user
+
         order = json.loads(data['order'])
         order['user'] = user.pk
         order_serilizer = OrderSerializer(data=order)
         order_serilizer.is_valid(raise_exception=True)
         order = order_serilizer.save()
+        print(data['user'])
+        dataUser = json.loads(data['user'])
+        dataUser['order'] = order.pk
+        travler = TravelerDetailsSerializer(data=dataUser)
+        travler.is_valid(raise_exception=True)
+        # travler.save(order=order)
+
         try:
             items = json.loads(data['items'])
             for item in items:
@@ -184,10 +229,12 @@ class OrderViewSet(viewsets.ModelViewSet):
             pan.save()
 
         return Response(status=status.HTTP_201_CREATED, data={'id': order.pk})
+
     @action(detail=False, methods=['post'], serializer_class=OrderSerializer)
-    def List(self,request,*args,**kwargs):
+    def List(self, request, *args, **kwargs):
+
         pass
-        
+
 
 class FileStorageViewSet(viewsets.ModelViewSet):
     queryset = Visa.objects.all()
@@ -221,6 +268,24 @@ class UserQueryViewSet(viewsets.ModelViewSet):
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
+    def create(self, request, *args, **kwargs):
+        print(request.data)
+        data = request.data
+
+        admins = Group.objects.get(name='query_admin')
+        # send email to all admins
+        print(admins.user_set.all())
+        emails = [admin.email for admin in admins.user_set.all()]
+        for email in emails:
+            send_email(
+                subject="New Query",
+                body="A new query has been submitted<br> Please check the admin panel for more details<br> by: " +
+                data["name"]+"<br>email: "+data["email"]+"<br>querry: "+data["query"]+"<br>Regards, <br>WorldOne Forex",
+                to_email=email
+            )
+
+        return super().create(request, *args, **kwargs)
+
 
 class ResumeViewSet(APIView):
     def post(self, request, *args, **kwargs):
@@ -230,4 +295,3 @@ class ResumeViewSet(APIView):
         resume = Resume(file=res_file)
         resume.save()
         return Response(status=status.HTTP_201_CREATED)
-

@@ -1,0 +1,14 @@
+{
+  "tech": {
+    "email": "tech@worldoneforex.com",
+    "password": "admin_admin",
+    "host": "smtp.rediffmailpro.com",
+    "port": 587
+  },
+  "techy": {
+    "email": "tech@worldoneforex.com",
+    "password": "admin_admin",
+    "host": "smtp.rediffmailpro.com",
+    "port": 587
+  }
+}

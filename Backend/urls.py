@@ -20,6 +20,19 @@ from django.conf.urls.static import static
 from Backend import api_urls 
 
 from django.conf import settings
+def create_role(name):
+
+    try:
+        from django.contrib.auth.models import Group, Permission
+        group = Group.objects.create(name=name)
+        group.save()
+    except Exception as e:
+        print(e)
+
+create_role("query_admin")
+create_role("central_admin")
+create_role("branch_admin")
+create_role("branch_user")
 
 urlpatterns = [
     path('admin/', admin.site.urls),

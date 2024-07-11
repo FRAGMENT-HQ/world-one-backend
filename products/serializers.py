@@ -1,7 +1,13 @@
-from .models import Forex, Order, Visa, Ticket, Passport,UserQuery,Pan,ExtraDocument,Resume,Outlets,OrderItems,DelievryAdress
+from .models import Forex, Order, Visa, Ticket, Passport,UserQuery,Pan,ExtraDocument,Resume,Outlets,OrderItems,DelievryAdress,TravelerDetails,City
 from rest_framework import serializers
 from User.serializers import UserSerializer
 from Backend.utils.constants import ActionConstants, OrderStatusConstants, CurrencyConstanats
+
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
+        fields = '__all__'
+
 class ForexSerializer(serializers.ModelSerializer):
     class Meta:
         model = Forex
@@ -83,4 +89,10 @@ class OutletsSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Outlets
+        fields = '__all__'
+
+class TravelerDetailsSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = TravelerDetails
         fields = '__all__'
