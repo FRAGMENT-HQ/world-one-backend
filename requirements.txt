@@ -23,5 +23,6 @@ django-celery-results
 matplotlib
 gevent
 cashfree_pg
+google-cloud-storage
 
 
