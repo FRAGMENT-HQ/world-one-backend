@@ -14,8 +14,8 @@ def crete_city(city_name):
         city.save()
         print(f"{city_name} is created")
 
-for city in CityConstants.CityChoices:
-    crete_city(city[1])
+# for city in CityConstants.CityChoices:
+#     crete_city(city[1])
 router = DefaultRouter()
 router.register(r'forex', ForexViewSet, basename='forex')
 router.register(r'order', OrderViewSet, basename='order')
