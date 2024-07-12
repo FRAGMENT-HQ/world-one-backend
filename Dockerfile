@@ -12,6 +12,7 @@ WORKDIR /usr/itb
 COPY ./requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt
 RUN pip install --upgrade 'sentry-sdk[django]'
+RUN pip install requests
 
 
 COPY . .
