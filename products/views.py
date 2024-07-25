@@ -19,6 +19,32 @@ import requests
 # Create your views here.
 india_tz = pytz.timezone('Asia/Kolkata')
 
+def update_forex():
+    obj = Forex.objects.first()
+    if obj:
+        # convert ot indian standerd time
+        # now = datetime.datetime.now( datetime.timezone.utc).astimezone(datetime.timezone.utc )
+        if not obj.created_at.astimezone(india_tz) + datetime.timedelta(minutes=10) < datetime.datetime.now(india_tz):
+            resp = requests.get(
+            f'https://v6.exchangerate-api.com/v6/c7dbfb5bc19040987eb0a90f/latest/INR')
+            try:
+                data = resp.json()
+                cr = data['conversion_rates']
+
+                # forex = Forex.objects.filter(currency=curr).first()
+
+                for i in cr:
+                    print(i)
+                    forex = Forex.objects.filter(currency=i).first()
+                    if forex:
+                        forex.rate = cr[i]
+                        forex.created_at = datetime.datetime.now(india_tz)
+                        forex.save()
+                    else:
+                        forex = Forex(currency=i, rate=cr[i])
+                        forex.save()
+            except:
+                pass
 
 class OutletsView(ListAPIView):
     queryset = Outlets.objects.all()
@@ -60,7 +86,9 @@ class ForexViewSet(viewsets.ModelViewSet):
     queryset = Forex.objects.all()
     serializer_class = ForexSerializer
     prioroity_set = ['USD', 'EUR', 'GBP', 'CAD', 'SGD', "AUD"]
+
     
+
 
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
@@ -73,6 +101,7 @@ class ForexViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
     def list(self, request, *args, **kwargs):
+        update_forex()
         city = request.GET.get('city', None)
         if city:
             city = City.objects.filter(name=city).first()
@@ -90,6 +119,7 @@ class ForexViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], serializer_class=ForexSerializer)
     def mini(self, request, *args, **kwargs):
+        update_forex()
         queryset = list(Forex.objects.all().filter(
             currency__in=self.prioroity_set))
         queryset = sorted(queryset, key=lambda x: self.prioroity_set.index(
@@ -102,6 +132,14 @@ class ForexViewSet(viewsets.ModelViewSet):
         # check if Forex had been called 10 minutes ago
         curr = request.GET.get('curr', None)
         city = request.GET.get('city', None)
+        product = request.GET.get('product', "currancy")
+        rate = Forex.objects.filter(currency=curr)
+        if rate.exists():
+            rate = rate.first()
+        else:
+            return Response(data={'error': 'Currency not found'}, status=status.HTTP_404_NOT_FOUND)
+        mark_up = rate.markupPercentage if product == "currancy" else rate.cardMarkupPercentage
+        mark_down = rate.markdownPercentage if product == "currancy" else rate.cardMarkdownPercentage
 
         if city:
             city = City.objects.filter(name=city).first()
@@ -120,7 +158,9 @@ class ForexViewSet(viewsets.ModelViewSet):
                       < datetime.datetime.now(india_tz))
 
                 rate = Forex.objects.filter(currency=curr).first()
-                return Response(data={'rate': rate.rate, "mark_up": rate.markupPercentage, "mark_down": rate.markdownPercentage, "usd": usd.rate, "city": citySer.data}, status=status.HTTP_200_OK)
+                
+
+                return Response(data={'rate': rate.rate, "mark_up": mark_up, "mark_down": mark_down, "usd": usd.rate, "city": citySer.data}, status=status.HTTP_200_OK)
 
         resp = requests.get(
             f'https://v6.exchangerate-api.com/v6/c7dbfb5bc19040987eb0a90f/latest/INR')
@@ -143,12 +183,17 @@ class ForexViewSet(viewsets.ModelViewSet):
             usd = Forex.objects.filter(currency='USD').first()
             rate = Forex.objects.filter(currency=curr).first()
 
-            return Response(data={'rate': rate.rate, "mark_up": rate.markupPercentage, "mark_down": rate.markdownPercentage, "city": citySer.data, 'usd': usd.rate}, status=status.HTTP_200_OK)
+            return Response(data={'rate': rate.rate, "mark_up": mark_up, "mark_down": mark_down, "city": citySer.data, 'usd': usd.rate}, status=status.HTTP_200_OK)
         except:
             rate = Forex.objects.filter(currency=curr).first()
             usd = Forex.objects.filter(currency='USD').first()
-            return Response(data={'rate': rate.rate, 'usd': usd.rate, "mark_up": rate.markupPercentage, "mark_down": rate.markdownPercentage, "city": citySer.data}, status=status.HTTP_200_OK)
-
+            return Response(data={'rate': rate.rate, 'usd': usd.rate, "mark_up": mark_up, "mark_down": mark_down, "city": citySer.data}, status=status.HTTP_200_OK)
+    @action(detail=False, methods=['get'], serializer_class=ForexSerializer)
+    def get_can_buy_rate(self, request, *args, **kwargs):
+        data = Forex.objects.filter(can_buy=True)
+        serializer = self.get_serializer(data, many=True)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+    
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
