@@ -59,7 +59,7 @@ class OrderAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        if request.user.city == 'ALL':
+        if request.user.city == 'all':
             return qs
         return qs.filter(city=request.user.city)
     inlines = [

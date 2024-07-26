@@ -42,15 +42,16 @@ class PayoutsView(APIView):
         print(user)
 
         customerDetails = CustomerDetails(
-            customer_id=f"wf_{user.id}",  customer_phone="9999999999", customer_email=user.email)
+            customer_id=f"wf_{user.id}",  customer_phone=user.phone_no, customer_email=user.email)
         createOrderRequest = CreateOrderRequest(order_amount=int(
-            amount*mul + gst + 100), order_currency="INR", customer_details=customerDetails, order_meta=meta)
+            amount*mul + gst ), order_currency="INR", customer_details=customerDetails, order_meta=meta)
         try:
             api_response = Cashfree().PGCreateOrder(
                 x_api_version, createOrderRequest, None, None).data.__dict__
-
-            Payment.objects.create(order=order, cashfree_id=api_response['order_id'], payment_status="pending",
+            print(api_response)
+            obj=Payment.objects.create(order=order, cashfree_id=api_response['order_id'], payment_status="pending",
                                    payment_request_id=api_response['cf_order_id'], payment_amount=int(amount*0.05))
+            print(obj.__dict__)
             return Response({"session": api_response['payment_session_id']})
 
         except Exception as e:
@@ -68,12 +69,28 @@ class confirmation(APIView):
         # payment = Payment.objects.filter(cashfree_id=data['order_id']).first()
         payment.payment_status = data['status']
         payment.save()
-        if data['status'] == "SUCCESS":
-            user =request.user
-            payment.order.payment_status = "paid"
-            payment.order.save()
-            send_email("Order Confirmation", f"Your order with id {payment.order.id} has been confirmed", user.email)
+        # if data['status'] == "SUCCESS":
+        #     user =request.user
+        #     payment.order.payment_status = "paid"
+        #     payment.order.save()
+        #     send_email("Order Confirmation", f"Your order with id {payment.order.id} has been confirmed", user.email)
         return Response({"message": "success"})
 
+class webhook(APIView):
+    def post(self, request):
+        data = request.data["data"]
+        cashfree_id=data["payment"]["cf_payment_id"]
+        print(cashfree_id)
+        payment = Payment.objects.filter(payment_request_id=cashfree_id)
+        if payment.exists():
+            payment = payment.first()
+            payment.payment_status = "Sucess"
+            payment.save()
+        
+            user = payment.order.user
+        
+            send_email("Order Confirmation", f"Your order with id {payment.order.id} has been confirmed", user.email)
+            return Response({"message": "success"})
+        else:
+            return Response({"message": "failed"})
 
-# Create your views here.
