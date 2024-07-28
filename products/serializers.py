@@ -13,6 +13,11 @@ class ForexSerializer(serializers.ModelSerializer):
         model = Forex
         fields = '__all__'
 
+class Forex_Name_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Forex
+        fields = ['currency']
+
 class DelievryAdressSerializer(serializers.ModelSerializer):
     class Meta:
         model = DelievryAdress

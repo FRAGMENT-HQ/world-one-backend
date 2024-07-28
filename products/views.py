@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny,IsAdminUser
 from rest_framework.decorators import action
 from rest_framework.views import APIView
-from .serializers import ForexSerializer, OrderSerializer, VisaSerializer, TicketSerializer, PassportSerializer, UserQuerySerializer, OutletsSerializer, OrderItemsSerializer, OrderItemsListSerializer, DelievryAdressSerializer, TravelerDetailsSerializer, CitySerializer
+from .serializers import ForexSerializer, OrderSerializer, VisaSerializer, TicketSerializer, PassportSerializer, UserQuerySerializer, OutletsSerializer, OrderItemsSerializer, OrderItemsListSerializer, DelievryAdressSerializer, TravelerDetailsSerializer, CitySerializer,Forex_Name_Serializer
 from User.serializers import UserSignupSerializer
 from User.models import User
 from rest_framework.generics import ListAPIView
@@ -31,8 +31,7 @@ def update_forex():
                 data = resp.json()
                 cr = data['conversion_rates']
 
-                # forex = Forex.objects.filter(currency=curr).first()
-
+                
                 for i in cr:
                     print(i)
                     forex = Forex.objects.filter(currency=i).first()
@@ -128,6 +127,12 @@ class ForexViewSet(viewsets.ModelViewSet):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'], serializer_class=VisaSerializer)
+    def get_tradable(self, request, *args, **kwargs):
+        data = Forex.objects.filter(can_buy=True)
+        serializer = Forex_Name_Serializer(data, many=True)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['get'], serializer_class=VisaSerializer)
     def get_rate(self, request, *args, **kwargs):
         # check if Forex had been called 10 minutes ago
         curr = request.GET.get('curr', None)
@@ -220,7 +225,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order_serilizer = OrderSerializer(data=order)
         order_serilizer.is_valid(raise_exception=True)
         order = order_serilizer.save()
-        print(data['user'])
+
         dataUser = json.loads(data['user'])
         dataUser['order'] = order.pk
         travler = TravelerDetailsSerializer(data=dataUser)

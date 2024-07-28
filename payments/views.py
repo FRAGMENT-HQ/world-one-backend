@@ -19,6 +19,7 @@ x_api_version = "2023-08-01"
 
 class PayoutsView(APIView):
     permission_classes = [IsAuthenticated]
+
     def post(self, request):
         # Create a client object
         data = request.data
@@ -27,6 +28,7 @@ class PayoutsView(APIView):
         user = request.user
         methord = data["methord"]
         partial = bool(data["partial"])
+        print(partial, data["partial"])
         mul = 1
         if partial:
             mul = 0.05
@@ -37,21 +39,23 @@ class PayoutsView(APIView):
         amount = 0
         for i in itms:
             amount += float(i.inr_amount)
+   
 
-        gst = amount * order.gst_amount
-        print(user)
+        gst = amount * (order.gst_amount-1)
 
         customerDetails = CustomerDetails(
             customer_id=f"wf_{user.id}",  customer_phone=user.phone_no, customer_email=user.email)
-        createOrderRequest = CreateOrderRequest(order_amount=int(
-            amount*mul + gst ), order_currency="INR", customer_details=customerDetails, order_meta=meta)
+        cba = int(amount*mul + gst)
+        print(cba,mul)
+        createOrderRequest = CreateOrderRequest(
+            order_amount=cba, order_currency="INR", customer_details=customerDetails, order_meta=meta)
         try:
             api_response = Cashfree().PGCreateOrder(
                 x_api_version, createOrderRequest, None, None).data.__dict__
             print(api_response)
-            obj=Payment.objects.create(order=order, cashfree_id=api_response['order_id'], payment_status="pending",
-                                   payment_request_id=api_response['cf_order_id'], payment_amount=int(amount*0.05))
-            print(obj.__dict__)
+            obj = Payment.objects.create(order=order, cashfree_id=api_response['order_id'], payment_status="pending",
+                                         payment_request_id=api_response['cf_order_id'], payment_amount=cba)
+            print(api_response['payment_session_id'])
             return Response({"session": api_response['payment_session_id']})
 
         except Exception as e:
@@ -61,6 +65,7 @@ class PayoutsView(APIView):
 
 class confirmation(APIView):
     permission_classes = [IsAuthenticated]
+
     def post(self, request):
         data = request.data
         order = Order.objects.filter(id=data['order_id']).first()
@@ -76,21 +81,22 @@ class confirmation(APIView):
         #     send_email("Order Confirmation", f"Your order with id {payment.order.id} has been confirmed", user.email)
         return Response({"message": "success"})
 
+
 class webhook(APIView):
     def post(self, request):
         data = request.data["data"]
-        cashfree_id=data["payment"]["cf_payment_id"]
+        cashfree_id = data["payment"]["cf_payment_id"]
         print(cashfree_id)
         payment = Payment.objects.filter(payment_request_id=cashfree_id)
         if payment.exists():
             payment = payment.first()
             payment.payment_status = "Sucess"
             payment.save()
-        
+
             user = payment.order.user
-        
-            send_email("Order Confirmation", f"Your order with id {payment.order.id} has been confirmed", user.email)
+
+            send_email("Order Confirmation",
+                       f"Your order with id {payment.order.id} has been confirmed", user.email)
             return Response({"message": "success"})
         else:
             return Response({"message": "failed"})
-
