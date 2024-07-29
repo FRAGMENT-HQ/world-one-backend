@@ -93,7 +93,7 @@ class ForexViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
     def get_permissions(self):
-        if self.action in ["mini", "get_rate", "list"] :
+        if self.action in ["mini", "get_rate", "list","get_tradable","get_can_buy_rate"] :
             permission_classes = [AllowAny]
         else:
             permission_classes = [IsAdminUser]
