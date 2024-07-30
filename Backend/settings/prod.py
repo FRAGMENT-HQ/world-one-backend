@@ -1,17 +1,18 @@
 import dj_database_url
 import os
 from .common import Common
+from google.oauth2 import service_account
 
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+BASE_DIR = os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__))))
 
 
 class Prod(Common):
 
-    
-
     INSTALLED_APPS = Common.INSTALLED_APPS
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    BASE_DIR = os.path.dirname(os.path.dirname(
+        os.path.dirname(os.path.abspath(__file__))))
     DEBUG = True
 
     # SECURITY WARNING: keep the secret key used in production secret!
@@ -20,27 +21,27 @@ class Prod(Common):
     # SECURITY WARNING: update this when you have the production host
     ALLOWED_HOSTS = ['*']
 
-    CSRF_TRUSTED_ORIGINS = ["http://localhost:3000","https://backend.worldoneforex.com","http://backend.worldoneforex.com", "https://worldoneforex.com","http://worldoneforex.com","https://www.worldoneforex.com","http://www.worldoneforex.com"]
+    CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "https://backend.worldoneforex.com", "http://backend.worldoneforex.com",
+                            "https://worldoneforex.com", "http://worldoneforex.com", "https://www.worldoneforex.com", "http://www.worldoneforex.com"]
 
-    MIDDLEWARE = Common.MIDDLEWARE + ["whitenoise.middleware.WhiteNoiseMiddleware"]
+    MIDDLEWARE = Common.MIDDLEWARE + \
+        ["whitenoise.middleware.WhiteNoiseMiddleware"]
 
     # STATICFILES_STORAGES = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-    STATIC_ROOT=os.path.join(BASE_DIR,'static')
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
     STATIC_URL = "/static/"
 
-    MEDIA_ROOT = os.path.join(BASE_DIR,'media')
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     MEDIA_URL = '/media_files/'
 
-    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_BUCKET_NAME')
-    AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
-    AWS_S3_SIGNATURE_VERSION = 's3v4'
-    AWS_S3_REGION_NAME =  "ap-south-1"
+    GS_BUCKET_NAME = 'worldone'
+    GCS_CREDENTIALS_JSON = os.path.join(BASE_DIR, 'world-one.json')
+    GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+        os.path.join(BASE_DIR, 'world-one.json')
+    )
 
-    AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400',
-}
+    GS_PROJECT_ID = 'world-one-428913'
+    GS_DEFAULT_ACL = 'private'
     STORAGES = {
         "staticfiles": {
             "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
@@ -52,7 +53,3 @@ class Prod(Common):
             "BACKEND": 'Backend.storage_backends.MediaStorage',
         },
     }
-    
-   
-   
-  
