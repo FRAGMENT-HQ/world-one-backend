@@ -1,0 +1,15 @@
+<!-- templates/admin/your_app/your_model_changelist.html -->
+<!-- templates/admin/your_app/your_model_changelist.html -->
+
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block content %}
+    <div class="object-tools">
+        <form action="{% url 'admin:upload_csv' %}" method="get" style="display: inline;">
+            <button type="submit" class="button btn btn-primary ">Upload CSV</button>
+        </form>
+    </div>
+    {{ block.super }}
+{% endblock %}
+

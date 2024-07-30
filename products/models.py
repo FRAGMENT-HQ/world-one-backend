@@ -12,6 +12,9 @@ class Forex(models.Model):
     rate = models.FloatField()
     markupPercentage = models.FloatField(default=0.1)
     markdownPercentage = models.FloatField(default=0.1)
+    cardMarkupPercentage = models.FloatField(default=0)
+    cardMarkdownPercentage = models.FloatField(default=0)
+    can_buy = models.BooleanField(default=False)
     priority = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -76,6 +79,8 @@ class OrderItems(models.Model):
     class Meta:
         verbose_name = 'OrderItems'
         verbose_name_plural = 'OrderItems'
+    
+    
 
 
 class Visa(models.Model):
@@ -183,6 +188,13 @@ class Outlets(models.Model):
     timming_weekend = models.CharField(max_length=40)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Outlets'
+        verbose_name_plural = 'Outlets'
+    
+    def __str__(self):
+        return f"{self.name} {self.city}"
 
 class City(models.Model):
     name = models.CharField(max_length=40,choices=CityConstants.CityChoices)

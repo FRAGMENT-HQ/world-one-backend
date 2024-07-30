@@ -8,7 +8,7 @@ from Backend.utils.constants import CityConstants
 class User(AbstractUser):
 
     name = models.CharField(max_length=40, blank=True, null=True)
-    phone_no = models.CharField(max_length=15, blank=True, unique=True)
+    phone_no = models.CharField(max_length=15, blank=True, unique=True,null=True)
     country_code = models.CharField(max_length=5, blank=True)
     email = models.EmailField(_('email'), max_length=80)
     pan_card = models.CharField(max_length=10, blank=True, null=True)

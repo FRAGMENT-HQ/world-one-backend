@@ -1,6 +1,10 @@
 from django.contrib import admin
 from .models import Forex, Order, Visa, Ticket, Passport, UserQuery, Pan, ExtraDocument, Outlets, OrderItems, DelievryAdress, User,City
 from payments.models import Payment
+from .forms import CSVUploadForm
+import csv
+from io import TextIOWrapper
+from django.shortcuts import render, redirect
 
 
 admin.site.site_header = "Admin"
@@ -55,7 +59,7 @@ class OrderAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        if request.user.city == 'ALL':
+        if request.user.city == 'all':
             return qs
         return qs.filter(city=request.user.city)
     inlines = [
@@ -90,14 +94,48 @@ class cityAdmin(admin.ModelAdmin):
     class Meta:
         model = City
 
-admin.site.register(Forex)
+class ForexAdmin(admin.ModelAdmin):
+  
+    # search_fields = ['currency']
+
+    change_list_template = "admin/products/forex_changelist.html"
+
+    def get_urls(self):
+        from django.urls import path
+        urls = super().get_urls()
+        custom_urls = [
+            path('upload-csv/', self.admin_site.admin_view(self.upload_csv), name='upload_csv'),
+        ]
+        return custom_urls + urls
+
+    def upload_csv(self, request):
+        if request.method == "POST":
+            form = CSVUploadForm(request.POST, request.FILES)
+            if form.is_valid():
+                csv_file = TextIOWrapper(request.FILES["csv_file"].file, encoding='utf-8')
+                reader = csv.reader(csv_file)
+                for row in reader:
+                    name = row[0]
+                    obj =Forex.objects.filter(currency=name)
+                    if obj.exists():
+                        obj = obj.first()
+                        obj.markupPercentage=row[1] 
+                        obj.markdownPercentage=row[2]
+                        obj.cardMarkupPercentage=row[3]
+                        obj.cardMarkdownPercentage=row[4]
+                        obj.save()
+                    print(row)
+                self.message_user(request, "Your csv file has been imported")
+                return redirect("..")
+        form = CSVUploadForm()
+        payload = {"form": form}
+        return render(request, "admin/csv_form.html", payload)
+    class Meta:
+        model = Forex
+
+admin.site.register(Forex,ForexAdmin)
 admin.site.register(Order, OrderAdmin)
-# admin.site.register(Visa)
-# admin.site.register(Ticket)
-# admin.site.register(Passport)
 admin.site.register(UserQuery, UserQueryAdmin)
-# admin.site.register(Pan)
-admin.site.register(ExtraDocument)
 admin.site.register(Outlets)
 admin.site.register(City,cityAdmin)
 

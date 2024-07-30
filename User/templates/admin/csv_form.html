@@ -1,0 +1,18 @@
+<!-- templates/admin/csv_form.html -->
+
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+  <div class="container mt-5">
+    <h2>Upload CSV</h2>
+    <form method="post" enctype="multipart/form-data" style={display:"flex",gap:"10px"} class="form-inline">
+      {% csrf_token %}
+      <div class="form-group mb-2">
+        {{ form.csv_file.label_tag }}
+        {{ form.csv_file }}
+      </div>
+      <button type="submit" class="btn btn-primary mb-2">Upload</button>
+    </form>
+  </div>
+{% endblock %}

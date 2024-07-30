@@ -35,22 +35,7 @@ class UserViewSet(viewsets.ModelViewSet):
         user.save()
         print(user.otp)
 
-        # try:
-        #     access_token = str(refresh.access_token)
-
-        # except TokenError:
-
-        #     return Response({'detail': 'Failed to generate access token.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        # response = Response({'detail': 'Created Sucesfull', 'access_token': access_token, 'user': UserSignupSerializer(
-        #     user).data,  'refresh_token': str(refresh)}, status=status.HTTP_201_CREATED)
-
-        # Set the refresh token as a cookie in the response
-        # response.set_cookie(
-        #     key=settings.SIMPLE_JWT['REFRESH_TOKEN_COOKIE_NAME'],
-        #     value=str(refresh),
-        #     httponly=True,
-        #     samesite=settings.SIMPLE_JWT['REFRESH_TOKEN_COOKIE_SAMESITE'],
-        #     secure=settings.SIMPLE_JWT['REFRESH_TOKEN_COOKIE_SECURE'],
+       
         # )
         print(otp)
         send_otp(str(otp), user.first_name, f'{user.country_code}{user.phone_no}', str(user.phone_no))
@@ -100,15 +85,12 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
 
         except Exception as e:
-            return Response({'error': 'Invalid credentials', "data": serializer.errors}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-        user = None
-        if 'phone_no' in data:
-            temp = User.objects.filter(phone_no=data['phone_no']).first()
-
-            user = authenticate(
+            return Response({'error': 'Invalid Phone no', "data": serializer.errors}, status=status.HTTP_401_UNAUTHORIZED)
+        print(data,serializer.validated_data)
+        user = authenticate(
                 phone_no=serializer.validated_data['phone_no'], password=serializer.validated_data['password'])
-            
-        if user and user.verification_status:
+        print(user)
+        if user :
 
             refresh = RefreshToken.for_user(user)
 
@@ -131,6 +113,16 @@ class UserViewSet(viewsets.ModelViewSet):
             )
 
             return response
+        # elif user and not user.verification_status:
+        #     # send otp
+        #     otp = random.randint(100000, 999999)
+        #     user.otp = otp
+        #     user.save()
+        #     print(user.otp)
+
+        #     send_otp(str(otp), user.first_name, f'{user.country_code}{user.phone_no}', str(user.phone_no))
+        #     return Response(status=status.HTTP_201_CREATED)
+        
         else:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -179,6 +171,8 @@ class UserViewSet(viewsets.ModelViewSet):
             user_serilizer = UserSignupSerializer(data=data)
             user_serilizer.is_valid(raise_exception=True)
             user = user_serilizer.save()
+            user.first_name = data['first_name']
+            user.save()
             return Response(data=user_serilizer.data, status=status.HTTP_201_CREATED)
     @action(detail=False, methods=['post'], serializer_class=UserSignupSerializer)
     def completeProfile(self, request):

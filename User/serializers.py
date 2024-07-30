@@ -18,7 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserSignupSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=40)
+    name = serializers.SerializerMethodField()
     phone_no = serializers.CharField(max_length=15, required=False, allow_blank=True)
     email = serializers.EmailField(max_length=80)
     password = serializers.CharField(write_only=True)
@@ -27,6 +27,9 @@ class UserSignupSerializer(serializers.Serializer):
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         return user
+    def get_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}"
+
 
 
 class UserLoginSerializer(serializers.Serializer):
