@@ -46,7 +46,7 @@ def update_forex():
                 pass
 
 class OutletsView(ListAPIView):
-    queryset = Outlets.objects.all()
+    queryset = Outlets.objects.all().order_by('name')
     serializer_class = OutletsSerializer
     permission_classes = [AllowAny]
 
