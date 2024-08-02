@@ -3,7 +3,8 @@ from django.utils.translation import gettext_lazy as _
 from Backend.utils.constants import ActionConstants, OrderStatusConstants, CurrencyConstanats,CityConstants
 
 from User.models import User
-
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 # Create your models here.
 
 
@@ -15,6 +16,7 @@ class Forex(models.Model):
     cardMarkupPercentage = models.FloatField(default=0)
     cardMarkdownPercentage = models.FloatField(default=0)
     can_buy = models.BooleanField(default=False)
+    can_transfer = models.BooleanField(default=False)
     priority = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -27,7 +29,11 @@ class Forex(models.Model):
         verbose_name = 'Forex'
         verbose_name_plural = 'Forex'
 
-
+@receiver(pre_save, sender=Forex)
+def set_can_transfer(sender, instance, **kwargs):
+    if instance._state.adding and instance.can_transfer is False:
+      
+        instance.can_transfer = instance.can_buy
 class Order(models.Model):
     currency = models.CharField(max_length=4, default="USD")
     action = models.IntegerField(

@@ -128,7 +128,11 @@ class ForexViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], serializer_class=VisaSerializer)
     def get_tradable(self, request, *args, **kwargs):
-        data = Forex.objects.filter(can_buy=True)
+        trade = request.GET.get('trade', "buy")
+        if trade == "buy":
+            data = Forex.objects.filter(can_buy=True)
+        else:
+            data = Forex.objects.filter(can_transfer=True)
         serializer = Forex_Name_Serializer(data, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
     
