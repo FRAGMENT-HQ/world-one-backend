@@ -348,4 +348,10 @@ class ResumeViewSet(APIView):
         res_file = files.get('resume', None)
         resume = Resume(file=res_file)
         resume.save()
+        send_email(
+                subject="New Resume recived",
+                body="A new Resume has been submitted<br> Please check the admin panel for more details<br> <br>Regards, <br>WorldOne Forex",
+                to_email="hr.worldoneforex@gmail.com"
+            )
+
         return Response(status=status.HTTP_201_CREATED)
