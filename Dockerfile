@@ -17,4 +17,4 @@ RUN pip install requests
 
 COPY . .
 
-CMD ["sh", "-c", "export PYTHONPATH=/usr/itb;export DJANGO_CONFIGURATION=Prod; python manage.py collectstatic --no-input;python manage.py makemigrations;python manage.py migrate;gunicorn Backend.wsgi:application -b 0.0.0.0:9069 --timeout 60000 "]
+CMD ["sh", "-c", "export PYTHONPATH=/usr/itb;export DJANGO_CONFIGURATION=Prod; python manage.py collectstatic --no-input;python manage.py makemigrations;python manage.py migrate;gunicorn Backend.wsgi:application  --workers 3 --threads 4 -b 0.0.0.0:9069 --timeout 60000 "]

@@ -4,7 +4,8 @@ from .models import City
 from Backend.utils.constants import CityConstants
 from django.core.exceptions import ObjectDoesNotExist
 from .models import Forex
-from multiprocessing import Process, Queue, Pool, Manager, Lock, Semaphore
+# from multiprocessing import Process, Queue, Pool, Manager, Lock, Semaphore
+from threading import Thread
 import requests
 import time
 
@@ -51,8 +52,11 @@ def run_update_forex():
         update_forex()
         time.sleep(60)
 # run_update_forex()in a separate process
-p = Process(target=run_update_forex)
-p.start()
+thread = Thread(target=run_update_forex)
+thread.daemon = True  # Ensure the thread stops when the main program exits
+thread.start()
+
+
 
 
 
