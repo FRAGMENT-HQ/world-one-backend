@@ -42,7 +42,6 @@ class Common(Configuration):
         'ckeditor_uploader',
         'corsheaders',
         'django_extensions',
-        'django_crontab',
 
         # apps
         'User.apps.UserConfig',
@@ -97,12 +96,14 @@ class Common(Configuration):
     # Database
     # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+# docker build . -t backend -f ./Dockerfile
 
     AUTH_PASSWORD_VALIDATORS = [
         {

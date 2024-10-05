@@ -20,30 +20,27 @@ import requests
 india_tz = pytz.timezone('Asia/Kolkata')
 
 def update_forex():
-    obj = Forex.objects.first()
-    if obj:
-        # convert ot indian standerd time
-        # now = datetime.datetime.now( datetime.timezone.utc).astimezone(datetime.timezone.utc )
-        if not obj.created_at.astimezone(india_tz) + datetime.timedelta(minutes=10) < datetime.datetime.now(india_tz):
-            resp = requests.get(
-            f'https://v6.exchangerate-api.com/v6/c7dbfb5bc19040987eb0a90f/latest/INR')
-            try:
-                data = resp.json()
-                cr = data['conversion_rates']
+    respose =requests.get("https://ibrlive.com/wp-json/my-forex-api/v1/rates?token=0097406b8fdff60c8959f03019d673d5")
+    respose = respose.json()
+    respose = respose["data"]
+    print("I work")
+    for data in respose:
+        if data["from_curr"] == "INR":
+            forObj = Forex.objects.filter(currency=data["to_curr"])
+            if forObj.exists():
+                forObj=forObj[0]
+                forObj.rate = data["rate"]
+                forObj.save()
+            else:
+                forObj = Forex.objects.create(
+                    
+                        currency=data["to_curr"],
+                        rate=data["rate"]
 
-                
-                for i in cr:
-                    print(i)
-                    forex = Forex.objects.filter(currency=i).first()
-                    if forex:
-                        forex.rate = cr[i]
-                        forex.created_at = datetime.datetime.now(india_tz)
-                        forex.save()
-                    else:
-                        forex = Forex(currency=i, rate=cr[i])
-                        forex.save()
-            except:
-                pass
+                    
+                )
+                # forObj.save()
+
 
 class OutletsView(ListAPIView):
     queryset = Outlets.objects.all().order_by('name')
