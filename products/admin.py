@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Forex, Order, Visa, Ticket, Passport, UserQuery, Pan, ExtraDocument, Outlets, OrderItems, DelievryAdress, User,City
+from .models import Forex, Order, Visa, Ticket, Passport, UserQuery, Pan, ExtraDocument, Outlets, OrderItems, DelievryAdress, User,City,Resume
 from payments.models import Payment
 from .forms import CSVUploadForm
 import csv
@@ -138,7 +138,7 @@ admin.site.register(Order, OrderAdmin)
 admin.site.register(UserQuery, UserQueryAdmin)
 admin.site.register(Outlets)
 admin.site.register(City,cityAdmin)
-
+admin.site.register(Resume)
 
 
 # Register your models here.

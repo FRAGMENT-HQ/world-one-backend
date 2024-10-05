@@ -8,3 +8,4 @@ class Payment(models.Model):
     payment_status = models.CharField(max_length=100)
     payment_request_id = models.CharField(max_length=100)
     payment_amount = models.CharField(max_length=100)
+    payment_link = models.TextField(default="")

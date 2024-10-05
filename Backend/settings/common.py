@@ -42,6 +42,7 @@ class Common(Configuration):
         'ckeditor_uploader',
         'corsheaders',
         'django_extensions',
+        'django_crontab',
 
         # apps
         'User.apps.UserConfig',
@@ -70,6 +71,11 @@ class Common(Configuration):
     CORS_ORIGIN_ALLOW_ALL = True
     ROOT_URLCONF = 'Backend.urls'
     # CORS_ALLOW_ALL_ORIGINS = True
+
+    CRONJOBS = [
+    ('*/5 * * * *', 'products.tasks.update_values'),
+    # Add more cron jobs as needed
+    ]
 
     TEMPLATES = [
         {
