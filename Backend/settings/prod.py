@@ -34,7 +34,7 @@ class Prod(Common):
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     MEDIA_URL = '/media_files/'
 
-    GS_BUCKET_NAME = 'worldone'
+    GS_BUCKET_NAME = 'world_one'
     GCS_CREDENTIALS_JSON = os.path.join(BASE_DIR, 'world-one.json')
     GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
         os.path.join(BASE_DIR, 'world-one.json')
