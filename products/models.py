@@ -69,7 +69,7 @@ class TravelerDetails(models.Model):
     country_code = models.CharField(max_length=5, default="91")
     email = models.EmailField()
     name = models.CharField(max_length=40)
-    panNumber = models.CharField(max_length=12)
+    panNumber = models.CharField(max_length=12,blank=True,null=True,default="")
     phone_no = models.CharField(max_length=14)
 
 
