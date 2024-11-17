@@ -13,7 +13,7 @@ def send_otp(otp,name,phone,user_id):
 
 
     headers = {
-        'authkey': "426019AjoLCxbOvSF668e382bP1",
+        'authkey': "",
         'accept': "application/json",
         'content-type': "application/json"
     }

@@ -16,7 +16,7 @@ class Prod(Common):
     DEBUG = True
 
     # SECURITY WARNING: keep the secret key used in production secret!
-    SECRET_KEY = "your_secret_key"
+    SECRET_KEY = ""
 
     # SECURITY WARNING: update this when you have the production host
     ALLOWED_HOSTS = ['*']
@@ -40,7 +40,7 @@ class Prod(Common):
         os.path.join(BASE_DIR, 'world-one.json')
     )
 
-    GS_PROJECT_ID = 'world-one-428913'
+    GS_PROJECT_ID = ''
     GS_DEFAULT_ACL = 'private'
     STORAGES = {
         "staticfiles": {

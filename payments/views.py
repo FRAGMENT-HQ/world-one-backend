@@ -25,8 +25,8 @@ def genrate_link(order_id, amount, phone_no, email):
         "accept": "application/json",
         "content-type": "application/json",
         "x-api-version": "2023-08-01",
-        "x-client-id": "649473fea04bd2c52eb3562df5374946",
-        "x-client-secret": "cfsk_ma_prod_52f37f75779f043b62de44eb3305b42a_d8cc3965"
+        "x-client-id": "",
+        "x-client-secret": ""
         # "x-client-id": "TEST101499510773cdbd8252237d9f0a15994101",
         # "x-client-secret": "cfsk_ma_test_3dc2a88ccedd435bea00346c5fe5b723_a318d218"
     }
@@ -60,8 +60,8 @@ def verify_link(id):
     headers = {
     "accept": "application/json",
     "x-api-version": "2023-08-01",
-    "x-client-id": "649473fea04bd2c52eb3562df5374946",
-    "x-client-secret": "cfsk_ma_prod_52f37f75779f043b62de44eb3305b42a_d8cc3965"
+    "x-client-id": "",
+    "x-client-secret": ""
     #  "x-client-id": "TEST101499510773cdbd8252237d9f0a15994101",
     #     "x-client-secret": "cfsk_ma_test_3dc2a88ccedd435bea00346c5fe5b723_a318d218"
     }
