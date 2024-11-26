@@ -35,9 +35,9 @@ class UserChangeForm(forms.ModelForm):
         model = User
         fields = ('phone_no', 'email', 'password', 'city' ,'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')
 
-    def clean_password(self):
-        # Regardless of what the user provides, return the initial value.
-        return self.initial["password"]
+    # def clean_password(self):
+    #     # Regardless of what the user provides, return the initial value.
+    #     return self.initial["password"]
 
     def save(self, commit=True):
         # Save the user with a hashed password if it's being changed
