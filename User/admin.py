@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import User
 from django import forms
+from django.contrib.auth.admin import UserAdmin
 
 class UserCreationForm(forms.ModelForm):
     """A form for creating new users. Includes all the required fields, plus a repeated password."""
@@ -57,4 +58,13 @@ class userAdmin( admin.ModelAdmin):
     add_form = UserCreationForm
 
     list_display = ['email','first_name','last_name','phone_no']
-   
+
+# class userAdmin(UserAdmin):
+#     ordering = ('email',)
+#     list_display = ['email','first_name','last_name','phone_no']
+#     search_fields = ('email','first_name','last_name','phone_no')
+#     readonly_fields = ('date_joined', 'last_login')
+#     exclude = ('username',)
+#     pass
+
+# admin.site.register(User, userAdmin)

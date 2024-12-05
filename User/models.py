@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from User.manager import UserManager
 from Backend.utils.constants import CityConstants
+from django.contrib.auth.hashers import make_password
 
 
 class User(AbstractUser):
@@ -32,3 +33,11 @@ class User(AbstractUser):
     class Meta:
         verbose_name = _("user")
         verbose_name_plural = _("users")
+    def save(self, *args, **kwargs):
+   
+        if self.password and not self.password.startswith(('pbkdf2_sha256$', 'bcrypt$', 'argon2')):
+        
+            self.password = make_password(self.password)
+    
+        return super().save(*args, **kwargs)
+
